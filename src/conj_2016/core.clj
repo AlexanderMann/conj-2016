@@ -87,16 +87,22 @@
                 (/ sum-p)))]
     [h (m/div p sum-p)]))
 
-;>>> for i in range(0,3):
-;...   print D[i, Math.concatenate((Math.r_[0:i], Math.r_[i+1:3]))];
-;...
-;[2 3]
-;[4 6]
-;[7 8]
-;>>> D
-;array ([[1, 2, 3],
-;  [4, 5, 6],
-;  [7, 8, 9] ])
+(defn row-but-diag
+  "Return the nth row of the matrix except for the nth element"
+  [^Matrix matrix n]
+  ;>>> D = Math.array([[1, 2, 3],[4, 5, 6],[7, 8, 9]]);
+  ;>>> D
+  ;array ([[1, 2, 3],
+  ;  [4, 5, 6],
+  ;  [7, 8, 9]])
+  ;>>> for i in range(0,3):
+  ;...   print D[i, Math.concatenate((Math.r_[0:i], Math.r_[i+1:3]))];
+  ;...
+  ;[2 3]
+  ;[4 6]
+  ;[7 8]
+  (m/select matrix n (remove (partial = n)
+                             (range (m/column-count matrix)))))
 
 ;43 def x2p(X = Math.array([]), tol = 1e-5, perplexity = 30.0):
 ;44     """Performs a binary search to get P-values in such a way that each conditional Gaussian has the same perplexity."""
