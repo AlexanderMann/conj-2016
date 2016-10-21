@@ -1,9 +1,10 @@
 (ns conj-2016.core
-  (:require [clojure.java.io :as io]
+  (:require [clojure.core.matrix :as m]
+            [clojure.core.matrix.random :as m.rnd]
+            [clojure.java.io :as io]
+            [clojure.spec :as s]
             [clojure.string :as string]
-            [incanter.core :as i.core]
-            [clojure.core.matrix :as m]
-            [clojure.core.matrix.random :as m.rnd])
+            [incanter.core :as i.core])
   (:import [java.util.zip GZIPInputStream]
            [mikera.matrixx Matrix]))
 
@@ -49,12 +50,12 @@
      (i.core/matrix (map second inp))]))
 
 (defn rand-matrix
-  [r c]
-  (i.core/matrix (repeatedly r (partial m.rnd/sample-normal c))))
+  [num-rows num-cols]
+  (i.core/matrix (repeatedly num-rows (partial m.rnd/sample-normal num-cols))))
 
 (defn one-matrix
-  [r c]
-  (i.core/matrix (repeatedly r (constantly 1))))
+  [num-rows num-cols]
+  (m/add (m/zero-matrix num-rows num-cols) 1))
 
 (defn matrices
   [^Matrix matrix]
@@ -101,8 +102,14 @@
   ;[2 3]
   ;[4 6]
   ;[7 8]
-  (m/select matrix n (remove (partial = n)
-                             (range (m/column-count matrix)))))
+  (let [r (m/get-row matrix n)]
+    (i.core/matrix
+     (concat (subvec r 0 n)
+             (subvec r (inc n) (m/column-count matrix)))))
+  (m/select matrix
+            n
+            (remove (partial = n)
+                    (range (m/column-count matrix)))))
 
 ;43 def x2p(X = Math.array([]), tol = 1e-5, perplexity = 30.0):
 ;44     """Performs a binary search to get P-values in such a way that each conditional Gaussian has the same perplexity."""
@@ -158,7 +165,8 @@
   ;88             (H, thisP) = Hbeta(Di, beta[i]);
   ;89             Hdiff = H - logU;
   ;90             tries = tries + 1;
-  (loop [h-diff h-diff
+  (loop [d-i nil
+         h-diff h-diff
          this-p (i.core/matrix [] [])
          tries 0]
     ;71         while Math.abs(Hdiff) > tol and tries < 50:
@@ -166,10 +174,10 @@
                  (< tries 50))
       this-p
       (let [[h this-p] (hbeta d-i (calc-beta))]
-        (recur (m/sub h log-u)
+        (recur nil
+               (m/sub h log-u)
                this-p
-               (inc tries)))))
-  )
+               (inc tries))))))
 
 (defn x2p
   "Performs a binary search to get P-values in such a way that each conditional Gaussian has the same perplexity."
@@ -192,9 +200,7 @@
                  sum-x)
         p (m/zero-matrix nr nr)
         beta (one-matrix nr 1)
-        log-u (i.core/log perplexity)]
-
-    ))
+        log-u (i.core/log perplexity)]))
 
 (defn p-values
   [^Matrix matrix perplexity]
