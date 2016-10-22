@@ -5,30 +5,9 @@
             [clojure.test.check.clojure-test :as tc.ct]
             [clojure.test.check.generators :as tc.gen]
             [clojure.test.check.properties :as tc.prop]
-            [clojure.java.shell :as shell]
             [conj-2016.core :refer :all]
-            [clojure.string :as string])
+            [incanter.core :as i.core])
   (:import [mikera.matrixx Matrix]))
-
-(defmulti shell-parseable type)
-
-(defmethod shell-parseable Matrix
-  [obj])
-
-(defmethod shell-parseable String
-  [obj]
-  obj)
-
-(shell-parseable "hello'world")
-
-(defn build-python-payload
-  [& args]
-  (->> args
-       (map shell-parseable)
-       (string/join ", ")
-       (format "(%s)")))
-
-(shell/sh "python" "--version")
 
 (defn dimensions-match?
   [matrix num-rows num-cols]
