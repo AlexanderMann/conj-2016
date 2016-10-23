@@ -1,5 +1,6 @@
 (ns conj-2016.core
-  (:require [clojure.core.matrix :as m]
+  (:require ;apache-commons-matrix.core
+            [clojure.core.matrix :as m]
             [clojure.core.matrix.random :as m.rnd]
             [clojure.java.io :as io]
             [clojure.spec :as s]
@@ -53,9 +54,25 @@
   [num-rows num-cols]
   (i.core/matrix (repeatedly num-rows (partial m.rnd/sample-normal num-cols))))
 
+(defn val-matrix
+  [num-rows num-cols val]
+  (m/add (m/zero-matrix num-rows num-cols) val))
+
 (defn one-matrix
   [num-rows num-cols]
-  (m/add (m/zero-matrix num-rows num-cols) 1))
+  (val-matrix num-rows num-cols val))
+
+(defn exp
+  [^Matrix matrix]
+  (m/emap (fn [^Double d]
+            (Math/exp d))
+          matrix))
+
+(defn log
+  [^Matrix matrix]
+  (m/emap (fn [^Double d]
+            (Math/log d))
+          matrix))
 
 (defn matrices
   [^Matrix matrix]
@@ -67,7 +84,9 @@
 
 (defn hbeta
   "Compute the perplexity and the P-row for a specific value of the precision of a Gaussian distribution."
-  [^Matrix matrix beta]
+  [^Matrix matrix_n_m beta]
+  ;; Note: using hungarian notation for dimensions
+
   ;32 def Hbeta(D = Math.array([]), beta = 1.0):
   ;33     """Compute the perplexity and the P-row for a specific value of the precision of a Gaussian distribution."""
   ;34
@@ -77,16 +96,17 @@
   ;38     H = Math.log(sumP) + beta * Math.sum(D * P) / sumP;
   ;39     P = P / sumP;
   ;40     return H, P;
-  (let [p (-> matrix
-              m/negate
-              (m/mul beta)
-              (m/pow Math/E))
-        sum-p (m/esum p)
-        h (+ (Math/log sum-p)
-             (* beta
-                (m/esum (m/mmul matrix p))
-                (/ sum-p)))]
-    [h (m/div p sum-p)]))
+  (let [p_n_m (-> matrix_n_m
+                  m/negate
+                  (m/mul beta)
+                  exp)
+        sum-p_1_m (i.core/matrix (map m/esum (m/columns p_n_m)))
+        sum-dp (m/esum (m/mul matrix_n_m p_n_m))
+        h_1_m (m/add (log sum-p_1_m)
+                     (m/div (val-matrix 1 (m/column-count p_n_m) (* beta sum-dp))
+                            sum-p_1_m))]
+    [(m/as-vector h_1_m)
+     (m/div p_n_m sum-p_1_m)]))
 
 (defn row-but-diag
   "Return the nth row of the matrix except for the nth element"
