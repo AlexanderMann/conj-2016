@@ -4,6 +4,10 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :resource-paths ["resources"]
-  :dependencies [[org.clojure/clojure "1.9.0-alpha13"]
-                 [org.clojure/test.check "0.9.0"]
-                 [incanter "1.9.1"]])
+  :dependencies [[apache-commons-matrix "0.3.0"]
+                 [cheshire "5.6.3"]
+                 [clatrix "0.5.0"]
+                 [incanter "1.9.1"]
+                 [net.mikera/core.matrix "0.56.0"]
+                 [org.clojure/clojure "1.9.0-alpha13"]
+                 [org.clojure/test.check "0.9.0"]])
