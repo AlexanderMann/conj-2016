@@ -8,112 +8,10 @@
             [clojure.test.check.properties :as tc.prop]
             [conj-2016.core :refer :all]
             [conj-2016.util.python :as u.py]
+            [conj-2016.util.comparator :as u.comp]
+            [conj-2016.util.generator :as t.u.gen]
             [incanter.core :as i.core])
   (:import [mikera.matrixx Matrix]))
-
-(defn gen-matrix*
-  ([value-generator]
-    (gen-matrix* (tc.gen/tuple tc.gen/s-pos-int tc.gen/s-pos-int)
-                 value-generator))
-  ([dimension-generator value-generator]
-   (tc.gen/fmap
-     i.core/matrix
-     (tc.gen/bind
-       dimension-generator
-       (fn [[n m]]
-         (tc.gen/vector
-           (tc.gen/vector value-generator
-                          m)
-           n))))))
-
-(def gen-matrix
-  (gen-matrix* (tc.gen/double* {:infinite? false :NaN? false})))
-
-(def gen-s-pos-matrix
-  (gen-matrix* (tc.gen/double* {:infinite? false :NaN? false :min Double/MIN_VALUE})))
-
-(def gen-square-matrix
-  (gen-matrix* (tc.gen/bind
-                 tc.gen/s-pos-int
-                 (fn [n] (tc.gen/tuple (tc.gen/return n) (tc.gen/return n))))
-               (tc.gen/double* {:infinite? false :NaN? false})))
-
-(defn dimensions-match?
-  [matrix num-rows num-cols]
-  (and (= num-rows (m/row-count matrix))
-       (= num-cols (m/column-count matrix))))
-
-(defn non-numeric-number?
-  "Returns true when nil, or is a double which is NaN/+-Inf"
-  [obj]
-  (when (or (nil? obj)
-            (double? obj))
-    (or (nil? obj)
-        (.isNaN obj)
-        (.isInfinite obj))))
-
-(defn- range-intersect?
-  [[r0 r1] [r2 r3] num-tolerance]
-  ;(println (<= r0 r3) (<= r2 r1) (< (Math/abs (- r2 r1)) num-tolerance) r0 r1 r2 r3 num-tolerance)
-  (and (<= r0 r3)
-       (or (<= r2 r1)
-           (< (Math/abs (- r2 r1)) num-tolerance))))
-
-(defn- fuzzy=
-  "Diff doesn't do a great job at helping us with numbers that are realllllyyy close.
-  When sending values through the shell to Python and diffing them against Matrix
-  multiplication values in the JVM...numerical percision becomes signicant."
-  [a b & {:keys [num-tolerance
-                 relative?
-                 bracket-by-ulp?
-                 ulp-modifier]
-          :or {num-tolerance 0
-               relative? false
-               bracket-by-ulp? false
-               ulp-modifier identity}
-          :as opts}]
-  (cond
-    (= a b) true
-
-    (and (non-numeric-number? a)
-         (non-numeric-number? b))
-    true
-
-    (and (number? a)
-         (number? b))
-    (or (and bracket-by-ulp?
-             (let [a-ulp (ulp-modifier (Math/ulp a))
-                   b-ulp (ulp-modifier (Math/ulp b))
-                   a-range [(- a a-ulp) (+ a a-ulp)]
-                   b-range [(- b b-ulp) (+ b b-ulp)]]
-               (or (range-intersect? a-range b-range num-tolerance)
-                   (range-intersect? b-range a-range num-tolerance))))
-        (and (let [d (Math/abs (- a b))]
-               (if relative?
-                 (< (->> (min a b)
-                         Math/abs
-                         (max Double/MIN_VALUE)
-                         (/ d))
-                    num-tolerance)
-                 (< d num-tolerance)))))
-
-    (and (seqable? a)
-         (not (map? a))
-         (seqable? b)
-         (not (map? b)))
-    (every? identity
-            (map #(fuzzy= %1 %2
-                          :num-tolerance num-tolerance
-                          :relative? relative?
-                          :bracket-by-ulp? bracket-by-ulp?
-                          :ulp-modifier ulp-modifier)
-                 a
-                 b))
-
-    :else (throw (ex-info "This data type hasn't been implemented!!!"
-                          {:a a
-                           :b b
-                           :opts opts}))))
 
 (tc.ct/defspec
   random-matrix-is-of-expected-size
@@ -121,9 +19,9 @@
   (tc.prop/for-all
     [num-rows tc.gen/s-pos-int
      num-cols tc.gen/s-pos-int]
-    (dimensions-match? (rand-matrix num-rows num-cols)
-                       num-rows
-                       num-cols)))
+    (u.comp/dimensions-match? (rand-matrix num-rows num-cols)
+                              num-rows
+                              num-cols)))
 
 (tc.ct/defspec
   one-matrix-is-of-expected-size
@@ -131,9 +29,9 @@
   (tc.prop/for-all
     [num-rows tc.gen/s-pos-int
      num-cols tc.gen/s-pos-int]
-    (dimensions-match? (one-matrix num-rows num-cols)
-                       num-rows
-                       num-cols)))
+    (u.comp/dimensions-match? (one-matrix num-rows num-cols)
+                              num-rows
+                              num-cols)))
 
 (tc.ct/defspec
   one-matrix-is-all-ones
@@ -148,7 +46,7 @@
   exp->log
   100
   (tc.prop/for-all
-    [g-matrix (gen-matrix* (tc.gen/double*
+    [g-matrix (t.u.gen/gen-matrix* (tc.gen/double*
                              {:infinite? false
                               :NaN? false
                               :min (->> (for [i (range 0 1000 0.01)]
@@ -161,19 +59,19 @@
                                         (remove #(.isInfinite (last %)))
                                         last
                                         first)}))]
-    (fuzzy= g-matrix
-            (log (exp g-matrix))
-            :num-tolerance 1)))
+    (u.comp/fuzzy= g-matrix
+                   (log (exp g-matrix))
+                   :num-tolerance 1)))
 
 (tc.ct/defspec
   log->exp
   100
   (tc.prop/for-all
-    [g-matrix gen-s-pos-matrix]
-    (fuzzy= g-matrix
-            (exp (log g-matrix))
-            :num-tolerance 1
-            :relative? true)))
+    [g-matrix t.u.gen/gen-s-pos-matrix]
+    (u.comp/fuzzy= g-matrix
+                   (exp (log g-matrix))
+                   :num-tolerance 1
+                   :relative? true)))
 
 (tc.ct/defspec
   matrix->update!-non-diag_single-element
@@ -203,7 +101,7 @@
   100
   (tc.prop/for-all
     [g-payload (tc.gen/bind
-                 (gen-matrix* (tc.gen/bind
+                 (t.u.gen/gen-matrix* (tc.gen/bind
                                 tc.gen/s-pos-int
                                 (fn [n] (tc.gen/tuple
                                           (tc.gen/return (inc n))
@@ -233,34 +131,27 @@
            update-vec] g-payload
           mutable-matrix (m/clone original-matrix)
           result
-          (and (fuzzy= mutable-matrix original-matrix)
+          (and (u.comp/fuzzy= mutable-matrix original-matrix)
                (update!-non-diag mutable-matrix row-n update-vec)
-               (not (fuzzy= mutable-matrix original-matrix))
-               (fuzzy= (m/get-row mutable-matrix row-n)
-                       (m/mset update-vec row-n (m/mget original-matrix row-n row-n))))]
+               (not (u.comp/fuzzy= mutable-matrix original-matrix))
+               (u.comp/fuzzy= (m/get-row mutable-matrix row-n)
+                              (m/mset update-vec row-n (m/mget original-matrix row-n row-n))))]
       result)))
-
-(defn- diff-hbeta
-  [g-matrix g-beta]
-  (let [{:keys [data success?] :as expected-hbeta} (u.py/python-result "textSNE" "tsne" "Hbeta"
-                                                              g-matrix g-beta)
-        actual-hbeta (map m/to-nested-vectors (hbeta g-matrix g-beta))]
-    (and success?
-         (fuzzy= data
-                 actual-hbeta
-                 :num-tolerance 0.001
-                 :relative? true))))
-
-(def prop-hbeta
-  (tc.prop/for-all
-    [matrix gen-matrix
-     beta (tc.gen/double* {:infinite? false :NaN? false :min 1.0})]
-    (diff-hbeta matrix beta)))
 
 (tc.ct/defspec
   hbeta-matches-pyton-impl
   100
-  prop-hbeta)
+  (tc.prop/for-all
+    [g-matrix t.u.gen/gen-matrix
+     g-beta (tc.gen/double* {:infinite? false :NaN? false :min 1.0})]
+    (let [{:keys [data success?] :as expected-hbeta} (u.py/python-result "textSNE" "tsne" "Hbeta"
+                                                                         g-matrix g-beta)
+          actual-hbeta (map m/to-nested-vectors (hbeta g-matrix g-beta))]
+      (and success?
+           (u.comp/fuzzy= data
+                          actual-hbeta
+                          :num-tolerance 0.001
+                          :relative? true)))))
 
 (comment
   (tc/quick-check 10 prop-matrix->update!-non-giag)
