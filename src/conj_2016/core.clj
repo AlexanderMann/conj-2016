@@ -54,13 +54,14 @@
   [num-rows num-cols]
   (i.core/matrix (repeatedly num-rows (partial m.rnd/sample-normal num-cols))))
 
-(defn val-matrix
-  [num-rows num-cols val]
-  (m/add (m/zero-matrix num-rows num-cols) val))
+
+(defn n-matrix
+  [num-rows num-cols n]
+  (m/add (m/zero-matrix num-rows num-cols) n))
 
 (defn one-matrix
   [num-rows num-cols]
-  (val-matrix num-rows num-cols val))
+  (n-matrix num-rows num-cols 1))
 
 (defn exp
   [^Matrix matrix]
@@ -100,10 +101,10 @@
                   m/negate
                   (m/mul beta)
                   exp)
-        sum-p_1_m (i.core/matrix (map m/esum (m/columns p_n_m)))
+        sum-p_1_m (->> p_n_m m/transpose (m/slice-map m/esum))
         sum-dp (m/esum (m/mul matrix_n_m p_n_m))
         h_1_m (m/add (log sum-p_1_m)
-                     (m/div (val-matrix 1 (m/column-count p_n_m) (* beta sum-dp))
+                     (m/div (n-matrix 1 (m/column-count p_n_m) (* beta sum-dp))
                             sum-p_1_m))]
     [(m/as-vector h_1_m)
      (m/div p_n_m sum-p_1_m)]))
@@ -131,77 +132,28 @@
             (remove (partial = n)
                     (range (m/column-count matrix)))))
 
-;43 def x2p(X = Math.array([]), tol = 1e-5, perplexity = 30.0):
-;44     """Performs a binary search to get P-values in such a way that each conditional Gaussian has the same perplexity."""
-;45
+(defn update!-non-diag
+  "Updates the target row with the given vector expect for the diagonal element.
 
-;54
-;55     # Loop over all datapoints
-;56     for i in range(n):
-;57
-;58         # Print progress
-;59         if i % 500 == 0:
-;60             print "Computing P-values for point ", i, " of ", n, "..."
-;61
-;62         # Compute the Gaussian kernel and entropy for the current precision
-;63         betamin = -Math.inf;
-;64         betamax =  Math.inf;
-;65         Di = D[i, Math.concatenate((Math.r_[0:i], Math.r_[i+1:n]))];
-;66         (H, thisP) = Hbeta(Di, beta[i]);
-;67
-;68         # Evaluate whether the perplexity is within tolerance
-;69         Hdiff = H - logU;
-;70         tries = 0;
+  NOTE: assumes correct dimensions for target_n_m and vector_1_m,
+    also assumes that i is less than or equal to n and m.
 
-;91
-;92         # Set the final row of P
-;93         P[i, Math.concatenate((Math.r_[0:i], Math.r_[i+1:n]))] = thisP;
-;94
-;95     # Return final P-matrix
-;96     print "Mean value of sigma: ", Math.mean(Math.sqrt(1 / beta))
-;97     return P;
-
-(defn- calc-beta
-  [])
-
-(defn- while-iter
-  [h-diff tol log-u]
-  ;72
-  ;73             # If not, increase or decrease precision
-  ;74             if Hdiff > 0:
-  ;75                 betamin = beta[i];
-  ;76                 if betamax == Math.inf or betamax == -Math.inf:
-  ;77                     beta[i] = beta[i] * 2;
-  ;78                 else:
-  ;79                     beta[i] = (beta[i] + betamax) / 2;
-  ;80             else:
-  ;81                 betamax = beta[i];
-  ;82                 if betamin == Math.inf or betamin == -Math.inf:
-  ;83                     beta[i] = beta[i] / 2;
-  ;84                 else:
-  ;85                     beta[i] = (beta[i] + betamin) / 2;
-  ;86
-  ;87             # Recompute the values
-  ;88             (H, thisP) = Hbeta(Di, beta[i]);
-  ;89             Hdiff = H - logU;
-  ;90             tries = tries + 1;
-  (loop [d-i nil
-         h-diff h-diff
-         this-p (i.core/matrix [] [])
-         tries 0]
-    ;71         while Math.abs(Hdiff) > tol and tries < 50:
-    (if-not (and (< tol (i.core/abs h-diff))
-                 (< tries 50))
-      this-p
-      (let [[h this-p] (hbeta d-i (calc-beta))]
-        (recur nil
-               (m/sub h log-u)
-               this-p
-               (inc tries))))))
+  ex.
+  [[1 2 3]
+   [4 5 6]
+   [0 0 9]]
+  2
+  [7 8 1000]
+  ->
+  [[1 2 3]
+   [4 5 6]
+   [7 8 9]]"
+  [^Matrix target_n_m i ^AVector vector_1_m]
+  (m/set-row! target_n_m i (m/mset vector_1_m i (m/mget target_n_m i i))))
 
 (defn x2p
   "Performs a binary search to get P-values in such a way that each conditional Gaussian has the same perplexity."
-  [^Matrix matrix tol perplexity]
+  [^Matrix matrix_n_m tol perplexity]
   ;46     # Initialize some variables
   ;47     print "Computing pairwise distances..."
   ;48     (n, d) = X.shape;
@@ -210,17 +162,59 @@
   ;51     P = Math.zeros((n, n));
   ;52     beta = Math.ones((n, 1));
   ;53     logU = Math.log(perplexity);
-  (let [nr (m/row-count matrix)
-        nc (m/column-count matrix)
-        sum-x (->> matrix
-                   m/square
-                   (map m/esum))
-        d (m/add (m/transpose (m/add (m/mul (m/dot matrix (m/transpose matrix)) -2)
-                                     sum-x))
-                 sum-x)
-        p (m/zero-matrix nr nr)
-        beta (one-matrix nr 1)
-        log-u (i.core/log perplexity)]))
+
+  (let [n (m/row-count matrix_n_m)
+        m (m/column-count matrix_n_m)
+        sum-x_1_m (->> matrix_n_m
+                       m/transpose
+                       (m/slice-map (comp m/esum m/square)))
+        d_1_m (m/add (m/transpose (m/add (m/mul (m/dot matrix_n_m (m/transpose matrix_n_m)) -2)
+                                         sum-x_1_m))
+                     sum-x_1_m)
+        p_n_n (m/zero-matrix n n)
+        beta_n_1 (one-matrix n 1)
+        log-u (i.core/log perplexity)]
+    ;55     # Loop over all datapoints
+    ;56     for i in range(n):
+    (doseq [i (range n)]
+      ;62         # Compute the Gaussian kernel and entropy for the current precision
+      ;63         betamin = -Math.inf;
+      ;64         betamax =  Math.inf;
+      ;65         Di = D[i, Math.concatenate((Math.r_[0:i], Math.r_[i+1:n]))];
+      ;66         (H, thisP) = Hbeta(Di, beta[i]);
+      ;67
+      ;68         # Evaluate whether the perplexity is within tolerance
+      ;69         Hdiff = H - logU;
+      ;70         tries = 0;
+      ;71         while Math.abs(Hdiff) > tol and tries < 50:
+      ;72
+      ;73             # If not, increase or decrease precision
+      ;74             if Hdiff > 0:
+      ;75                 betamin = beta[i];
+      ;76                 if betamax == Math.inf or betamax == -Math.inf:
+      ;77                     beta[i] = beta[i] * 2;
+      ;78                 else:
+      ;79                     beta[i] = (beta[i] + betamax) / 2;
+      ;80             else:
+      ;81                 betamax = beta[i];
+      ;82                 if betamin == Math.inf or betamin == -Math.inf:
+      ;83                     beta[i] = beta[i] / 2;
+      ;84                 else:
+      ;85                     beta[i] = (beta[i] + betamin) / 2;
+      ;86
+      ;87             # Recompute the values
+      ;88             (H, thisP) = Hbeta(Di, beta[i]);
+      ;89             Hdiff = H - logU;
+      ;90             tries = tries + 1;
+      ;91
+      ;92         # Set the final row of P
+      ;93         P[i, Math.concatenate((Math.r_[0:i], Math.r_[i+1:n]))] = thisP;
+      ;(update!-non-diag p_n_n this-p_1_n)
+      )
+    ;95     # Return final P-matrix
+    ;96     print "Mean value of sigma: ", Math.mean(Math.sqrt(1 / beta))
+    ;97     return P;
+    p_n_n))
 
 (defn p-values
   [^Matrix matrix perplexity]
