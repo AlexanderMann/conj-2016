@@ -209,7 +209,7 @@
                                           (tc.gen/return (inc n))
                                           (tc.gen/return (inc n)))))
                               tc.gen/double)
-                 (fn [^Matrix matrix_n_n]
+                 (fn [matrix_n_n]
                    (let [n (m/row-count matrix_n_n)]
                      (tc.gen/bind
                        (tc.gen/choose 0 (dec n))
@@ -221,35 +221,24 @@
                              i.core/matrix
                              (tc.gen/vector
                                (tc.gen/such-that
-                                 #(not (contains? (->> (m/get-row matrix_n_n i)
-                                                       m/to-nested-vectors
-                                                       (into #{}))
-                                                  %))
+                                 #(as-> matrix_n_n $
+                                        (m/get-row $ i)
+                                        (into #{} $)
+                                        (contains? $ %)
+                                        (not $))
                                  tc.gen/double)
-                                            n))))))))]
-    (let [[target-matrix
+                               n))))))))]
+    (let [[original-matrix
            row-n
            update-vec] g-payload
-          original-matrix target-matrix]
-      (and (= original-matrix target-matrix)
-           (update!-non-diag target-matrix row-n update-vec)
-           (not= original-matrix target-matrix)
-           (= (m/get-row target-matrix row-n)
-              (m/mset update-vec row-n (m/mget original-matrix row-n row-n)))))))
-
-(comment
-  (let [[target-matrix
-         row-n
-         update-vec]
-        [(i.core/matrix [[1.0,1.0], [-1.0,1.0]])
-         0
-         (i.core/matrix [-1.0,1.0])]
-        original-matrix target-matrix]
-    (and (= original-matrix target-matrix)
-         (update!-non-diag target-matrix row-n update-vec)
-         (not= original-matrix target-matrix)
-         #_(= (m/get-row target-matrix row-n)
-            (m/mset update-vec row-n (m/mget original-matrix row-n row-n))))))
+          mutable-matrix (m/clone original-matrix)
+          result
+          (and (fuzzy= mutable-matrix original-matrix)
+               (update!-non-diag mutable-matrix row-n update-vec)
+               (not (fuzzy= mutable-matrix original-matrix))
+               (fuzzy= (m/get-row mutable-matrix row-n)
+                       (m/mset update-vec row-n (m/mget original-matrix row-n row-n))))]
+      result)))
 
 (defn- diff-hbeta
   [g-matrix g-beta]
