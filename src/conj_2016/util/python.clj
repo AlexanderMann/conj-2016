@@ -1,11 +1,12 @@
 (ns conj-2016.util.python
   (:require clatrix.core
-            [clojure.core.matrix :as m]
-            [clojure.java.shell :as shell]
-            [clojure.java.io :as io]
             [cheshire.core :as json]
             [cheshire.factory :as json.factory]
-            [clojure.string :as string]))
+            [clojure.core.matrix :as m]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
+            [clojure.string :as string]
+            [incanter.core :as i.core]))
 
 (defmulti shell-parseable type)
 
@@ -41,9 +42,22 @@
   [obj]
   (matrix-parser obj))
 
+(defmethod shell-parseable mikera.vectorz.AVector
+  [obj]
+  (matrix-parser obj))
+
 (defmethod shell-parseable String
   [obj]
   {:o (string/escape obj {\" "\\\"" \' "\\'"})})
+
+(defmethod shell-parseable Double
+  [^Double obj]
+  (cond
+    (.isInfinite obj)
+    {:deps ["import numpy"]
+     :o (str (when (neg? obj) "-") "numpy.inf")}
+
+    :else {:o (str obj)}))
 
 (defmethod shell-parseable :default
   [obj]
@@ -87,7 +101,10 @@
          {:keys [exit out] :as result} (apply shell/sh python-bash)
          data (when (zero? exit)
                 (try
-                  (parse-json out)
+                  (-> out
+                      string/split-lines
+                      last
+                      parse-json)
                   (catch Exception e
                     e)))]
      (-> result
