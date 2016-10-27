@@ -22,6 +22,8 @@
        (or (<= r2 r1)
            (< (Math/abs (- r2 r1)) num-tolerance))))
 
+(def fuzzy=-implementation-issue (atom nil))
+
 (defn fuzzy=
   "Diff doesn't do a great job at helping us with numbers that are realllllyyy close.
   When sending values through the shell to Python and diffing them against Matrix
@@ -73,7 +75,8 @@
                  a
                  b))
 
-    :else (throw (ex-info "This data type hasn't been implemented!!!"
-                          {:a a
-                           :b b
-                           :opts opts}))))
+    :else (do (reset! fuzzy=-implementation-issue
+                      {:a a
+                       :b b
+                       :opts opts})
+              false)))

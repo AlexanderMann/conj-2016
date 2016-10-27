@@ -17,6 +17,19 @@
                           m)
            n))))))
 
+(defn gen-avector*
+  [dimension-generator value-generator]
+  (tc.gen/fmap
+    i.core/matrix
+    (tc.gen/bind
+      dimension-generator
+      (fn [n]
+        (tc.gen/vector value-generator
+                       n)))))
+
+(def gen-avector
+  (gen-avector* tc.gen/pos-int (tc.gen/double* {:infinite? false :NaN? false})))
+
 (def gen-matrix
   (gen-matrix* (tc.gen/double* {:infinite? false :NaN? false})))
 
