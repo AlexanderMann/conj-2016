@@ -1,7 +1,8 @@
 (ns conj-2016.util.matrix
   (:require [incanter.core :as i.core]
             [clojure.core.matrix :as m]
-            [clojure.core.matrix.random :as m.rnd])
+            [clojure.core.matrix.random :as m.rnd]
+            [taoensso.timbre :as log])
   (:import [mikera.vectorz AVector]
            [mikera.matrixx Matrix]))
 
