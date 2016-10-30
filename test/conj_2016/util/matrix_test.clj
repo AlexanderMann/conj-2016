@@ -1,4 +1,4 @@
-(ns conj-2016.util.matrix-text
+(ns conj-2016.util.matrix-test
   (:require [clojure.core.matrix :as m]
             [clojure.test :refer :all]
             [clojure.test.check :as tc]
@@ -102,28 +102,24 @@
                  (t.u.gen/gen-matrix* (tc.gen/bind
                                         tc.gen/s-pos-int
                                         (fn [n] (tc.gen/tuple
-                                                  (tc.gen/return (inc n))
+                                                  (tc.gen/return (+ n 2))
                                                   (tc.gen/return (inc n)))))
-                                      tc.gen/double)
+                                      tc.gen/double
+                                      true)
                  (fn [matrix_n_n]
                    (let [n (m/row-count matrix_n_n)]
                      (tc.gen/bind
-                       (tc.gen/choose 0 (dec n))
+                       (tc.gen/choose 0 (- n 2))
                        (fn [i]
                          (tc.gen/tuple
-                           (tc.gen/return matrix_n_n)
+                           (tc.gen/return (m/select matrix_n_n
+                                                    :butlast
+                                                    :all))
                            (tc.gen/return i)
-                           (tc.gen/fmap
-                             i.core/matrix
-                             (tc.gen/vector
-                               (tc.gen/such-that
-                                 #(as-> matrix_n_n $
-                                        (m/get-row $ i)
-                                        (into #{} $)
-                                        (contains? $ %)
-                                        (not $))
-                                 tc.gen/double)
-                               n))))))))]
+                           (tc.gen/return (m/select matrix_n_n
+                                                    :last
+                                                    :all))))))))]
+    tc.gen/vector-distinct
     (let [[original-matrix
            row-n
            update-vec] g-payload

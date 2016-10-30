@@ -1,21 +1,30 @@
 (ns conj-2016.util.generator
   (:require [clojure.test.check.generators :as tc.gen]
-            [incanter.core :as i.core]))
+            [incanter.core :as i.core])
+  (:import [java.math MathContext]))
 
 (defn gen-matrix*
   ([value-generator]
    (gen-matrix* (tc.gen/tuple tc.gen/s-pos-int tc.gen/s-pos-int)
                 value-generator))
   ([dimension-generator value-generator]
+   (gen-matrix* dimension-generator value-generator false))
+  ([dimension-generator value-generator uniq?]
    (tc.gen/fmap
      i.core/matrix
      (tc.gen/bind
        dimension-generator
        (fn [[n m]]
-         (tc.gen/vector
-           (tc.gen/vector value-generator
-                          m)
-           n))))))
+         (if uniq?
+           (tc.gen/fmap
+             (partial partition m)
+             (tc.gen/vector-distinct
+               value-generator
+               {:num-elements (* n m)}))
+           (tc.gen/vector
+             (tc.gen/vector value-generator
+                            m)
+             n)))))))
 
 (defn gen-avector*
   [dimension-generator value-generator]
@@ -41,3 +50,13 @@
                  tc.gen/s-pos-int
                  (fn [n] (tc.gen/tuple (tc.gen/return n) (tc.gen/return n))))
                (tc.gen/double* {:infinite? false :NaN? false})))
+
+(defn- to-precision
+  [precision ^Double d]
+  (.doubleValue (BigDecimal. d (MathContext. precision))))
+
+(defn double*
+  [{:keys [precision] :as opts}]
+  (tc.gen/fmap
+    (partial to-precision precision)
+    (tc.gen/double* opts)))
