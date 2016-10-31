@@ -50,7 +50,7 @@
   [g-vector g-beta]
   (python-impl-diff
     hbeta
-    {:repo   "textSNE"
+    {:repo   "tsne_python"
      :module "tsne"
      :fname  "Hbeta"}
     {:num-tolerance 0.001}
@@ -80,7 +80,7 @@
   [g-matrix g-tolerance g-perplexity]
   (python-impl-diff
     x2p
-    {:repo   "textSNE"
+    {:repo   "tsne_python"
      :module "tsne"
      :fname  "x2p"}
     {:num-tolerance 0.001}

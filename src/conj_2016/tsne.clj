@@ -30,13 +30,11 @@
         h (+ (i.core/log sum-p)
              (/ (.doubleValue (* beta sum-dp))
                 (.doubleValue sum-p)))]
-    (log/info p_n)
-    (log/info sum-p)
-    (log/info sum-dp)
+    ;(log/info p_n)
+    ;(log/info sum-p)
+    ;(log/info sum-dp)
     [h
      (m/div p_n sum-p)]))
-
-(hbeta (i.core/matrix [1151.8311302648344, 920.7279048668078]) 4.0)
 
 (defn- update-beta
   [^Double betamin ^Double betamax ^Double beta ^Double diff]
@@ -94,9 +92,7 @@
                       (< tolerance (Math/abs ^Double h-logu))))
           ;51 P = Math.zeros((n, n));
           ;93 P[i, Math.concatenate((Math.r_[0:i], Math.r_[i+1:n]))] = thisP;
-          (do (log/info {:h h :h-logu h-logu :this-p_n-1 this-p_n-1
-                         :di_n-1 di_n-1 :beta beta})
-              (u.m/conj-idx this-p_n-1 0 idx))
+          (u.m/conj-idx this-p_n-1 0 idx)
           (let [[r-betamin
                  r-betamax
                  r-beta]
