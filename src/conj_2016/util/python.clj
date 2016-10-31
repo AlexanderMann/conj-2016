@@ -55,6 +55,10 @@
   [obj]
   (matrix-parser obj))
 
+(defmethod shell-parseable mikera.arrayz.impl.SliceArray
+  [obj]
+  (matrix-parser obj))
+
 (defmethod shell-parseable String
   [obj]
   {:o (string/escape obj {\" "\\\"" \' "\\'"})})
