@@ -10,7 +10,6 @@
   [num-rows num-cols]
   (i.core/matrix (repeatedly num-rows (partial m.rnd/sample-normal num-cols))))
 
-
 (defn n-matrix
   [num-rows num-cols n]
   (m/add (m/zero-matrix num-rows num-cols) n))
@@ -32,6 +31,8 @@
           matrix))
 
 (defn but-n
+  "Given an AVector v, return a vector of all elements
+  but the nth."
   [^AVector v n]
   (i.core/matrix (concat (take n v) (drop (inc n) v))))
 
