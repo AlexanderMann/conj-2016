@@ -1,49 +1,27 @@
 (ns conj-2016.core
   (:require [clojure.core.matrix :as m]
-            [clojure.java.io :as io]
-            [clojure.spec :as s]
-            [clojure.string :as string]
             [conj-2016.tsne :as tsne]
+            [conj-2016.parsers :as parsers]
             [conj-2016.util.graph :as graph]
-            [dali ]
-            [incanter.core :as i.core])
-  (:import [java.util.zip GZIPInputStream]))
+            [incanter.core :as i.core]
+            [taoensso.timbre :as log]
+            [taoensso.tufte :as tufte]))
+
+(tufte/add-handler!
+  :logging-println
+  "*"
+  (fn [m]
+    (let [{:keys [stats-str_ ?id ?data]} m
+          stats-str (force stats-str_)]
+      (log/debug
+        (str
+          (when ?id   (str "\nid: "   ?id))
+          (when ?data (str "\ndata: " ?data))
+          "\n" stats-str)))))
 
 (def dimensions 2)
 
-(defn gunzip
-  [path]
-  (with-open [in (GZIPInputStream.
-                  (clojure.java.io/input-stream
-                   path))]
-    (slurp in)))
-
-(defn parse-embeddings
-  [path]
-  (let [unzipped (gunzip path)
-        lines (string/split-lines unzipped)
-        line-parser (fn [v l]
-                      (let [[c & nums] (string/split l #" ")]
-                        (assert (not (contains? v c))
-                                (format "%s already in parsed embeddings. Duplicates are not allowed"
-                                        c))
-                        (assert (or (empty? v)
-                                    (= (-> v vals first count)
-                                       (count nums)))
-                                (format "Width of %d is different from required width of %d for %s"
-                                        (count nums) (-> v vals first count) c))
-                        (assoc v
-                          c (map read-string nums))))
-        vecs (vec (reduce line-parser {} lines))]
-    [(map first vecs)
-     (i.core/matrix (map second vecs))]))
-
-(def inp (parse-embeddings (io/resource "english-embeddings.turian.txt.gz")))
-
 (defn init-matrix
-  "Given the output of parse-embeddings, initialize a matrix. Output is an array, where
-  the first element is a list of strings and the second is a matrix. The list of strings
-  correlate to the rows in the matrix, where each string is a key from parsed-embeddings"
   [parsed-embeddings]
   (let [vecs (vec parsed-embeddings)
         coords (tsne/tsne (i.core/matrix (map second vecs))
@@ -54,10 +32,22 @@
     coords))
 
 (comment
-  (def inp (parse-embeddings (io/resource "english-embeddings.turian.txt.gz")))
 
-  (def tsne-inp (init-matrix inp))
-  (first tsne-inp)
-  (m/to-nested-vectors tsne-inp))
-
-;(m/maximum (last (init-matrix inp)))
+  (def tsne-mnist (tufte/profile
+                    {:dynamic? true}
+                    (tsne/tsne (second (parsers/mnist-embeddings))
+                               2
+                               30)))
+  (graph/svg-spit "/tmp/dali.mnist.svg"
+                  tsne-mnist
+                  (first (parsers/mnist-embeddings))
+                  {0 :cyan
+                   1 :magenta
+                   2 :orange
+                   3 :red
+                   4 :blue
+                   5 :green
+                   6 :fuchsia
+                   7 :lightskyblue
+                   8 :lime
+                   9 :darkorchid}))

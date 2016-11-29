@@ -17,7 +17,6 @@
 
 (defn range-intersect?
   [[r0 r1] [r2 r3] num-tolerance]
-  ;(println (<= r0 r3) (<= r2 r1) (< (Math/abs (- r2 r1)) num-tolerance) r0 r1 r2 r3 num-tolerance)
   (and (<= r0 r3)
        (or (<= r2 r1)
            (< (Math/abs (- r2 r1)) num-tolerance))))

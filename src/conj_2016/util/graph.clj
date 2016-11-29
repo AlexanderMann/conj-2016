@@ -7,15 +7,16 @@
 (def page-border 10)
 
 (defn label
-  [title x y]
+  [title x y fill-options]
   [:text {:font-size label-font-size
           :x x
           :y y
-          :fill :black}
-   title])
+          :fill (get fill-options title :black)}
+   (str title)])
 
 (defn page
-  [coords titles]
+  "For colour options see http://www.december.com/html/spec/colorsvg.html"
+  [coords titles fill-options]
   (let [xs (map first coords)
         min-x (apply min xs)
         max-x (apply max xs)
@@ -30,19 +31,22 @@
                            (- min-c)
                            (* scale)
                            (+ page-border)))
-        adjusted-coords (map (fn [[x y]]
-                               [(adjust-coord x min-x)
-                                (adjust-coord y min-y)])
-                             coords)]
+        adjusted-coords (->> coords
+                             (map vec)
+                             (map (fn [[x y]]
+                                    [(adjust-coord x min-x)
+                                     (adjust-coord y min-y)])))]
     (apply vector
            :dali/page
            (map (fn [title [x y]]
-                  (label title x y))
+                  (label title x y fill-options))
                 titles
                 adjusted-coords))))
 
-(comment
-  (try
-    (d.io/render-svg (page [[1 2] [3 4] [-1.5 3.1]] ["a" "b" "c"]) "/tmp/dali.demo.svg")
-    (catch Exception e
-      (log/error e))))
+(defn svg-spit
+  "Example:
+  (svg-spit '/tmp/dali.demo.svg' [[1 2] [3 4] [-1.5 3.1]] [:a :b :c] {:a :black :b :blue})"
+  ([file coords titles fill-options]
+   (svg-spit file (page coords titles fill-options)))
+  ([file svg]
+   (d.io/render-svg svg file)))

@@ -31,16 +31,15 @@
                               data actual
                               (-> fuzzy=-opts vec flatten)))]
       (when-not outcome
-        (when-not (get @python-impl-diff-recent-failures py-call)
-          (log/error (format "\nFAILED: %s\nEXPECTED:\n%s\n\nACTUAL:\n%s\nINPUT:\n%s\n"
-                             nil                            ;py-call
-                             (with-out-str
-                               (pprint/pprint (if success?
-                                                data
-                                                expected)))
-                             (with-out-str
-                               (pprint/pprint actual))
-                             args)))
+        (log/error (format "\nFAILED: %s\nEXPECTED:\n%s\n\nACTUAL:\n%s\nINPUT:\n%s\n"
+                           py-call
+                           (with-out-str
+                             (pprint/pprint (if success?
+                                              data
+                                              expected)))
+                           (with-out-str
+                             (pprint/pprint actual))
+                           args))
         (swap! python-impl-diff-recent-failures assoc py-call args))
       outcome)
     (catch Exception e
@@ -217,8 +216,10 @@
                                  [-1.0 0.75 -0.5]])
                  10.0
                  (i.core/matrix [[1.25 -1.0] [-2.0 1.75] [-1.5 1.0]])))
-  (testing "tsne input"
+  #_(testing "tsne input"
     (is (diff-tsne (m/select (second (core/parse-embeddings (io/resource "english-embeddings.turian.txt.gz")))
                              (range 3) :all)
                    10.0
                    (u.m/rand-matrix 3 2)))))
+
+;(tsne-diff-matches)
