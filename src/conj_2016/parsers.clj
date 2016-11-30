@@ -91,9 +91,9 @@
 
 (defn collobert-weston-embeddings*
   []
-  (let [labels (with-open [rdr (clojure.java.io/reader "/Users/alexandermann/Downloads/senna/hash/words.lst")]
+  (let [labels (with-open [rdr (clojure.java.io/reader (io/resource "senna-embeddings/words.lst"))]
                  (doall (line-seq rdr)))
-        data-lines (-> "/Users/alexandermann/Downloads/senna/embeddings/embeddings.txt"
+        data-lines (-> (io/resource "senna-embeddings/embeddings.txt")
                        slurp
                        (csv/read-csv :separator \ ))
         data-parser (fn [nums]
