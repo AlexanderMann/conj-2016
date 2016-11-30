@@ -42,9 +42,7 @@ There are examples of SVG rendering presented in the `core` namespace in the com
 ## Collobert and Weston word embeddings of the english language's top 3000 words
 
 ![Alt text](https://rawgithub.com/AlexanderMann/conj-2016/master/renderings/dali.words-small.svg)
-<img src="https://rawgithub.com/AlexanderMann/conj-2016/master/renderings/dali.words-small.svg">
 
 ## The MNIST dataset
 
 ![Alt text](https://rawgithub.com/AlexanderMann/conj-2016/master/renderings/dali.mnist-1.svg)
-<img src="https://rawgithub.com/AlexanderMann/conj-2016/master/renderings/dali.mnist-1.svg">
