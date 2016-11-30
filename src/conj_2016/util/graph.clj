@@ -3,6 +3,7 @@
             [taoensso.timbre :as log]))
 
 (def label-font-size 5)
+(def min-page-dimension 100)
 (def label-percentage-size 0.1)
 (def page-border 10)
 
@@ -23,8 +24,14 @@
         ys (map second coords)
         min-y (apply min ys)
         max-y (apply max ys)
-        min-diff (min (Math/abs (- max-x min-x)) (Math/abs (- max-y min-y)))
-        scale (/ (max min-diff (/ label-font-size label-percentage-size))
+        max-label-length (->> titles
+                              (map (comp count str))
+                              (apply max))
+        min-diff (min (Math/abs (- max-x min-x))
+                      (Math/abs (- max-y min-y)))
+        scale (/ (max min-diff
+                      (/ (* max-label-length label-font-size)
+                         label-percentage-size))
                  min-diff)
         adjust-coord (fn [c min-c]
                        (-> c

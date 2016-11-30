@@ -15,4 +15,5 @@
                  [org.clojure/clojure "1.9.0-alpha13"]
                  [org.clojure/core.memoize "0.5.8"]
                  [org.clojure/data.csv "0.1.3"]
-                 [org.clojure/test.check "0.9.0"]])
+                 [org.clojure/test.check "0.9.0"]]
+  :aliases {"nrepl" ["repl" ":headless" ":port" "54321"]})

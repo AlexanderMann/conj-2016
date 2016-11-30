@@ -37,7 +37,21 @@
                     {:dynamic? true}
                     (tsne/tsne (second (parsers/mnist-embeddings))
                                2
-                               30)))
+                               30
+                               1000)))
+
+  (def tsne-words (tufte/profile
+                    {:dynamic? true}
+                    (tsne/tsne (second (parsers/collobert-weston-embeddings-filtered))
+                               2
+                               30
+                               100)))
+
+  (graph/svg-spit "/tmp/dali.words.svg"
+                  tsne-words
+                  (first (parsers/collobert-weston-embeddings-filtered))
+                  {})
+
   (graph/svg-spit "/tmp/dali.mnist.svg"
                   tsne-mnist
                   (first (parsers/mnist-embeddings))

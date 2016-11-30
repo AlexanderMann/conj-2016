@@ -12,6 +12,69 @@
                    (io/input-stream path))]
     (slurp in)))
 
+(def hiiamrohit-base-url "https://raw.githubusercontent.com/hiiamrohit/Countries-States-Cities-database/master/")
+(def hiiamrohit-countries-url (str hiiamrohit-base-url "countries.sql"))
+(def hiiamrohit-states-url (str hiiamrohit-base-url "states.sql"))
+(def hiiamrohit-cities-url (str hiiamrohit-base-url "cities.sql"))
+
+(defn places-countries*
+  []
+  (->> hiiamrohit-countries-url
+       slurp
+       string/split-lines
+       (map (partial re-matches #"\(\d+, '(\w+?)', '(\w+?)'\).*"))
+       (remove nil?)
+       (map rest)
+       flatten))
+
+(defn places-states*
+  []
+  (->> hiiamrohit-states-url
+       slurp
+       string/split-lines
+       (map (partial re-matches #"\(\d+, '(.+?)',.*"))
+       (remove nil?)
+       (map second)))
+
+(defn places-cities*
+  []
+  (->> hiiamrohit-cities-url
+       slurp
+       string/split-lines
+       (map (partial re-matches #"\(\d+, '(.+?)',.*"))
+       (remove nil?)
+       (map second)))
+
+(def places-countries (memoize places-countries*))
+(def places-states (memoize places-states*))
+(def places-cities (memoize places-cities*))
+
+(defn places-list
+  []
+  (->> (concat
+         (places-countries)
+         (places-states)
+         (places-cities))
+       (map string/lower-case)
+       (into #{})))
+
+(defn most-common-words
+  []
+  (->> (io/resource "3000-most-common-english-words.txt")
+       slurp
+       string/split-lines
+       (map string/lower-case)
+       (into #{})))
+
+(defn notable-words
+  []
+  (-> (places-list)
+      (into (most-common-words))
+      (into (map str (range 0 10)))
+      (into (->> (range 0 129)
+                 (map char)
+                 (map str)))))
+
 (defn turian-demo-english-embeddings*
   []
   (let [lines (-> (io/resource "english-embeddings.turian.txt.gz")
@@ -25,6 +88,33 @@
      (i.core/matrix (map second vecs))]))
 
 (def turian-demo-english-embeddings (memoize turian-demo-english-embeddings*))
+
+(defn collobert-weston-embeddings*
+  []
+  (let [labels (with-open [rdr (clojure.java.io/reader "/Users/alexandermann/Downloads/senna/hash/words.lst")]
+                 (doall (line-seq rdr)))
+        data-lines (-> "/Users/alexandermann/Downloads/senna/embeddings/embeddings.txt"
+                       slurp
+                       (csv/read-csv :separator \ ))
+        data-parser (fn [nums]
+                      (map #(Double/parseDouble %) nums))
+        data (map data-parser data-lines)]
+    [labels
+     (i.core/matrix data)]))
+
+(def collobert-weston-embeddings (memoize collobert-weston-embeddings*))
+
+(defn collobert-weston-embeddings-filtered*
+  []
+  (let [zipmapped (apply zipmap (collobert-weston-embeddings))
+        notable-set (notable-words)
+        is-notable? (fn [[label data]]
+                      (notable-set (string/lower-case label)))
+        notable-embeddings (filter is-notable? zipmapped)]
+    [(map first notable-embeddings)
+     (i.core/matrix (map second notable-embeddings))]))
+
+(def collobert-weston-embeddings-filtered (memoize collobert-weston-embeddings-filtered*))
 
 (defn mnist-embeddings*
   []
