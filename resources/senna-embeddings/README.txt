@@ -1,3 +1,6 @@
+# All credit to Collobert and Weston. This file, along with the contents of this folder were lifted from Collobert's [SENNA site](http://ronan.collobert.com/senna/)
+NOTE: The only modification to this file are these first two lines.
+
 These are the embeddings we obtained with our language model approach.
 They were used to initialize all our neural networks (for all tasks).
 Each line in embeddings.txt is a 50-dimensional vector, which represent
