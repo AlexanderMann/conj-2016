@@ -104,17 +104,14 @@
 
 (def collobert-weston-embeddings (memoize collobert-weston-embeddings*))
 
-(defn collobert-weston-embeddings-filtered*
-  []
+(defn collobert-weston-embeddings-filtered
+  [notable-set]
   (let [zipmapped (apply zipmap (collobert-weston-embeddings))
-        notable-set (notable-words)
         is-notable? (fn [[label data]]
                       (notable-set (string/lower-case label)))
         notable-embeddings (filter is-notable? zipmapped)]
     [(map first notable-embeddings)
      (i.core/matrix (map second notable-embeddings))]))
-
-(def collobert-weston-embeddings-filtered (memoize collobert-weston-embeddings-filtered*))
 
 (defn mnist-embeddings*
   []
