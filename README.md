@@ -8,11 +8,11 @@ I want to start by citing the sources that helped me get this far. This list is 
 ## tSNE Groundwork
 - [Original whitepaper](https://lvdmaaten.github.io/publications/papers/MachLearn_2012.pdf) by Hinton and van der Maaten
 - Laurens van der Maaten's [tSNE resource website](https://lvdmaaten.github.io/tsne/)
-- Joseph Turian's modifications for
+- Joseph Turian's [modifications/code for tSNE](https://github.com/turian/textSNE)
 
 ## SENNA
-- Original whitepaper detailing architecture of SENNA by Collobert and Weston
-- SENNA website
+- [Original whitepaper](http://ronan.collobert.com/pub/matos/2011_nlp_jmlr.pdf) detailing architecture of SENNA by Collobert and Weston
+- [SENNA website](http://ronan.collobert.com/senna/)
 
 ## Datasets
 I lifted datasets from the following places:

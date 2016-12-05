@@ -47,10 +47,18 @@
                                30
                                100)))
 
-  (graph/svg-spit "/tmp/dali.words.svg"
-                  tsne-words
-                  (first (parsers/collobert-weston-embeddings-filtered))
-                  {})
+  (let [[titles data] (parsers/collobert-weston-embeddings-filtered
+                        (parsers/most-common-words))]
+    #_(def tsne-words-small (tufte/profile
+                            {:dynamic? true}
+                            (tsne/tsne data
+                                       2
+                                       30
+                                       100)))
+    (graph/svg-spit "/tmp/dali.words-small.svg"
+                    tsne-words-small
+                    titles
+                    {}))
 
   (graph/svg-spit "/tmp/dali.mnist.svg"
                   tsne-mnist
