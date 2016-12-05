@@ -39,3 +39,10 @@ lein nrepl
 There are examples of SVG rendering presented in the `core` namespace in the comments below. The gist is though, to run data through `tSNE`, then pipe it into `spit-svg`. Pretty straightforward!
 
 # Example Renderings
+## Collobert and Weston word embeddings of the english language's top 3000 words
+
+![Alt text](https://rawgithub.com/AlexanderMann/conj-2016/master/renderings/dali.words-small.svg)
+
+## The MNIST dataset
+
+![Alt text](https://rawgithub.com/AlexanderMann/conj-2016/master/renderings/dali.mnist-1.svg)
