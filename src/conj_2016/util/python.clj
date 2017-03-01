@@ -1,4 +1,5 @@
 (ns conj-2016.util.python
+  "A namespace dedicated to being able to run clojure in python."
   (:require clatrix.core
             [cheshire.core :as json]
             [cheshire.factory :as json.factory]
@@ -6,7 +7,6 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as string]
-            [incanter.core :as i.core]
             [taoensso.timbre :as log])
   (:import [java.io File]))
 
@@ -86,16 +86,16 @@
   [obj]
   {:o (str obj)})
 
-(defn build-python-payload
+(defn- build-python-payload
   [& args]
   (seq-parser args))
 
-(defn install-robust-encoder
+(defn- install-robust-encoder
   []
   (format "sys.path.append('%s')"
           (.getParent (io/file (io/resource "jsonEncoder.py")))))
 
-(defn json-dumps
+(defn- json-dumps
   [result]
   (format "json.dumps(%s, cls=jsonEncoder.RobustEncoder, separators=(',',':'))"
           result))
@@ -106,7 +106,7 @@
                                           {:allow-non-numeric-numbers true})]
     (json/decode json-string)))
 
-(defn spat?
+(defn- spat?
   "Given a python command optionally spit it to a /tmp/ file
   when it would cause an:
 

@@ -1,8 +1,9 @@
 (ns conj-2016.util.matrix
+  "Helper fns which make interacting with core.matrix and
+  incanter a little more standardized."
   (:require [incanter.core :as i.core]
             [clojure.core.matrix :as m]
-            [clojure.core.matrix.random :as m.rnd]
-            [taoensso.timbre :as log])
+            [clojure.core.matrix.random :as m.rnd])
   (:import [mikera.vectorz AVector]
            [mikera.matrixx Matrix]))
 

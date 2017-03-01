@@ -1,4 +1,7 @@
 (ns conj-2016.parsers
+  "Used to take disparate sources for 'notable' words and parse them
+  into sets of words used to filter down various data language model
+  data sets."
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.spec :as s]
@@ -17,7 +20,7 @@
 (def hiiamrohit-states-url (str hiiamrohit-base-url "states.sql"))
 (def hiiamrohit-cities-url (str hiiamrohit-base-url "cities.sql"))
 
-(defn places-countries*
+(defn- places-countries*
   []
   (->> hiiamrohit-countries-url
        slurp
@@ -27,7 +30,7 @@
        (map rest)
        flatten))
 
-(defn places-states*
+(defn- places-states*
   []
   (->> hiiamrohit-states-url
        slurp
@@ -36,7 +39,7 @@
        (remove nil?)
        (map second)))
 
-(defn places-cities*
+(defn- places-cities*
   []
   (->> hiiamrohit-cities-url
        slurp
@@ -49,7 +52,7 @@
 (def places-states (memoize places-states*))
 (def places-cities (memoize places-cities*))
 
-(defn places-list
+(defn places-words
   []
   (->> (concat
          (places-countries)
@@ -68,7 +71,7 @@
 
 (defn notable-words
   []
-  (-> (places-list)
+  (-> (places-words)
       (into (most-common-words))
       (into (map str (range 0 10)))
       (into (->> (range 0 129)

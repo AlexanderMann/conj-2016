@@ -16,4 +16,5 @@
                  [org.clojure/core.memoize "0.5.8"]
                  [org.clojure/data.csv "0.1.3"]
                  [org.clojure/test.check "0.9.0"]]
+  :jvm-opts ["-Xmx8g"]
   :aliases {"nrepl" ["repl" ":headless" ":port" "54321"]})

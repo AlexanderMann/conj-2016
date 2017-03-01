@@ -1,7 +1,6 @@
 (ns conj-2016.util.matrix-test
   (:require [clojure.core.matrix :as m]
             [clojure.test :refer :all]
-            [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :as tc.ct]
             [clojure.test.check.generators :as tc.gen]
             [clojure.test.check.properties :as tc.prop]

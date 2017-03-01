@@ -21,7 +21,12 @@
        (or (<= r2 r1)
            (< (Math/abs (- r2 r1)) num-tolerance))))
 
-(def fuzzy=-implementation-issue (atom nil))
+(def fuzzy=-implementation-issue
+  "A useful for debugging atom. When fuzzy= fails this captures
+  the exact input to it, that way you can retrieve the values
+  exactly and compare for yourself whether they should have failed.
+  Useful for repling and not having to throw 'def everywhere."
+  (atom nil))
 
 (defn fuzzy=
   "Diff doesn't do a great job at helping us with numbers that are realllllyyy close.
