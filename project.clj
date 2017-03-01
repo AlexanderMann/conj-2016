@@ -12,7 +12,7 @@
                  [dali "0.7.3"]
                  [incanter "1.9.1"]
                  [net.mikera/core.matrix "0.56.0"]
-                 [org.clojure/clojure "1.9.0-alpha13"]
+                 [org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/core.memoize "0.5.8"]
                  [org.clojure/data.csv "0.1.3"]
                  [org.clojure/test.check "0.9.0"]]
