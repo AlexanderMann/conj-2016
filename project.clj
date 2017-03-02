@@ -9,7 +9,8 @@
                  [com.taoensso/timbre "4.8.0"]
                  [com.taoensso/tufte "1.1.1"]
                  [dali "0.7.3"]
-                 ;[incanter "1.9.1"]
+                 [incanter "1.9.1"
+                  :exclusions [org.clojure/clojure]]
                  [net.mikera/core.matrix "0.57.0"]
                  [org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/core.memoize "0.5.9"]
