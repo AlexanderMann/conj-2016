@@ -1,6 +1,7 @@
 dependencies:
   cache_directories:
     - /home/ubuntu/.cache/pip
+    - /home/ubuntu/.cache/wheelhouse
   pre:
     - pip --version
     - pip install wheel
