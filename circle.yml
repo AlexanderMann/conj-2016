@@ -2,5 +2,5 @@ dependencies:
   cache_directories:
     - /home/ubuntu/.cache/pip
   pre:
-    - pip install --user numpy matplotlib
+    - pip install --user numpy matplotlib:
         timeout: 1200
