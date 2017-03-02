@@ -165,6 +165,16 @@
          (log/error e)
          (log/error "Leaving file alone to be able to review")
          (log/error python-bash)
+         (throw e))
+       (catch Exception e
+         (log/error e {:repo repo
+                       :module module
+                       :code code
+                       :deps deps
+                       :dependencies dependencies
+                       :dir dir
+                       :command command
+                       :python-bash python-bash})
          (throw e))))))
 
 (defn python-result

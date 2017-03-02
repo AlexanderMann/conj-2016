@@ -21,6 +21,13 @@ I lifted datasets from the following places:
 - Places from hiiamrohit's [countries-states-cities-database github repo](https://github.com/hiiamrohit/Countries-States-Cities-database)
 - 3000 most common words were copy and pasted from [http://www.ef.com/english-resources/english-vocabulary/top-3000-words/](http://www.ef.com/english-resources/english-vocabulary/top-3000-words/)
 
+# Requirements
+You'll need to have the following installed locally to make this whole thing work:
+- Python
+- SciPy and its ilk
+  - The `pip` install commands listed in the `circle.yml` herein should be adequate
+- Leinengen
+
 # Expected Use
 ## Tests
 

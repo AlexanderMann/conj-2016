@@ -218,14 +218,18 @@
   dimensionality to no_dims dimensions.
 
   NOTE: the variadic call here is purely for testability. The
-  recommened call is 3 arg form."
+  recommened call is 3 or 4 arg form."
   ([^Matrix matrix_n_m n-dims perplexity]
+    ;; 3 arg
    (tsne matrix_n_m n-dims perplexity (u.m/rand-matrix (m/row-count matrix_n_m) n-dims) 1000))
   ([^Matrix matrix_n_m n-dims perplexity iterations]
+    ;; 4 arg
    (tsne matrix_n_m n-dims perplexity (u.m/rand-matrix (m/row-count matrix_n_m) n-dims) iterations))
-  ([^Matrix matrix_n_m n-dims _ perplexity _ _ ^Matrix rand-matrix_n_n-dims]
+  ([^Matrix matrix_n_m n-dims _ perplexity _ ^Matrix rand-matrix_n_n-dims]
+    ;; 6 arg, necessary for testing parity with Python
    (tsne matrix_n_m n-dims perplexity rand-matrix_n_n-dims 1000))
   ([^Matrix matrix_n_m n-dims perplexity ^Matrix rand_n_n-dims iterations]
+    ;; 5 arg
     ;126 (n, d) = X.shape;
     ;127 max_iter = 1000;
     ;128 initial_momentum = 0.5;
