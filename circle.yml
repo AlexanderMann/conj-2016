@@ -1,4 +1,6 @@
 dependencies:
-  post:
+  cache_directories:
+    - /home/ubuntu/.cache/pip
+  pre:
     - pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose:
         timeout: 1200

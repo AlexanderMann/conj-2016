@@ -1,4 +1,7 @@
 # conj-2016
+[![CircleCI](https://circleci.com/gh/AlexanderMann/conj-2016.svg?style=svg)](https://circleci.com/gh/AlexanderMann/conj-2016)
+
+![Places in the world](https://raw.githubusercontent.com/AlexanderMann/conj-2016/master/renderings/tsne-data_places_3--x_z.svg)
 
 This repo was used to prepare the talk given by Alex Mann at Cognitect's 2016 Conj Conference. It includes a standard implementation of tSNE, examples of data rendered this way, a novel implementation of interop between Clojure and Python, a number of datasets which can be rendered into Clojure objects, and some examples of generatives testing.
 
