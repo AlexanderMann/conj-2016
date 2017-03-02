@@ -1,7 +1,0 @@
-dependencies:
-  pre:
-    - lein -v
-    - yes y | sudo lein upgrade
-    - lein -v
-    - lein deps :tree
-    
