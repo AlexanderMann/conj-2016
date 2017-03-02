@@ -3,7 +3,7 @@ dependencies:
     - /home/ubuntu/.cache/pip
     - /home/ubuntu/.cache/wheelhouse
   pre:
-    - pip --version
+    - pip install --upgrade pip
     - pip install wheel
     - pip wheel --find-links=/home/ubuntu/.cache/wheelhouse --wheel-dir=/home/ubuntu/.cache/wheelhouse numpy
     - pip wheel --find-links=/home/ubuntu/.cache/wheelhouse --wheel-dir=/home/ubuntu/.cache/wheelhouse matplotlib
