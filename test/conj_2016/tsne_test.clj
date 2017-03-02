@@ -1,20 +1,16 @@
 (ns conj-2016.tsne-test
   (:require [clojure.core.matrix :as m]
-            [clojure.java.io :as io]
             [clojure.pprint :as pprint]
             [clojure.test :refer :all]
-            [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :as tc.ct]
             [clojure.test.check.generators :as tc.gen]
             [clojure.test.check.properties :as tc.prop]
-            [conj-2016.core :as core]
             [conj-2016.tsne :refer :all]
             [conj-2016.util.comparator :as u.comp]
             [conj-2016.util.generator :as t.u.gen]
             [conj-2016.util.python :as u.py]
             [incanter.core :as i.core]
-            [taoensso.timbre :as log]
-            [conj-2016.util.matrix :as u.m]))
+            [taoensso.timbre :as log]))
 
 (def num-tests 50)
 
@@ -57,7 +53,8 @@
 
 (def hbeta-prop
   (tc.prop/for-all
-    [g-vector t.u.gen/gen-avector
+    [g-vector (t.u.gen/such-that-python-limit
+                t.u.gen/gen-avector)
      g-beta (t.u.gen/double* {:infinite? false :NaN? false :min 1.0 :max 50 :precision 5})]
     (diff-hbeta g-vector g-beta)))
 
@@ -87,7 +84,8 @@
 
 (def x2p-prop
   (tc.prop/for-all
-    [g-matrix t.u.gen/gen-matrix
+    [g-matrix (t.u.gen/such-that-python-limit
+                t.u.gen/gen-matrix)
      g-tolerance (t.u.gen/double* {:infinite? false :NaN? false :min Double/MIN_VALUE :max 0.1 :precision 5})
      g-perplexity (tc.gen/double* {:infinite? false :NaN? false :min 10.0 :max 100.0 :precision 3})]
     (diff-x2p g-matrix g-tolerance g-perplexity)))
@@ -116,20 +114,21 @@
 
 (def gradient-prop
   (tc.prop/for-all
-    [g-matrix-payload (tc.gen/bind
-                        (tc.gen/choose 5 100)
-                        (fn [n]
-                          (tc.gen/tuple
-                            (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
-                                                               (tc.gen/return 2))
-                                                 (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
-                                                                   :precision 5})
-                                                 true)
-                            (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
-                                                               (tc.gen/return n))
-                                                 (t.u.gen/double* {:infinite? false :NaN? false :min -10.0 :max 10.0
-                                                                   :precision 5})
-                                                 true))))]
+    [g-matrix-payload (t.u.gen/such-that-python-limit
+                        (tc.gen/bind
+                          (tc.gen/choose 5 100)
+                          (fn [n]
+                            (tc.gen/tuple
+                              (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
+                                                                 (tc.gen/return 2))
+                                                   (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
+                                                                     :precision 5})
+                                                   true)
+                              (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
+                                                                 (tc.gen/return n))
+                                                   (t.u.gen/double* {:infinite? false :NaN? false :min -10.0 :max 10.0
+                                                                     :precision 5})
+                                                   true)))))]
     (diff-gradient (first g-matrix-payload) (last g-matrix-payload))))
 
 (tc.ct/defspec
@@ -149,25 +148,26 @@
 
 (def gains-prop
   (tc.prop/for-all
-    [g-matrix-payload (tc.gen/bind
-                        (tc.gen/choose 5 100)
-                        (fn [n]
-                          (tc.gen/tuple
-                            (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
-                                                               (tc.gen/return 2))
-                                                 (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
-                                                                   :precision 5})
-                                                 true)
-                            (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
-                                                               (tc.gen/return 2))
-                                                 (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
-                                                                   :precision 5})
-                                                 true)
-                            (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
-                                                               (tc.gen/return 2))
-                                                 (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
-                                                                   :precision 5})
-                                                 true))))]
+    [g-matrix-payload (t.u.gen/such-that-python-limit
+                        (tc.gen/bind
+                          (tc.gen/choose 5 100)
+                          (fn [n]
+                            (tc.gen/tuple
+                              (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
+                                                                 (tc.gen/return 2))
+                                                   (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
+                                                                     :precision 5})
+                                                   true)
+                              (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
+                                                                 (tc.gen/return 2))
+                                                   (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
+                                                                     :precision 5})
+                                                   true)
+                              (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
+                                                                 (tc.gen/return 2))
+                                                   (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
+                                                                     :precision 5})
+                                                   true)))))]
     (diff-gains (first g-matrix-payload) (second g-matrix-payload) (last g-matrix-payload))))
 
 (tc.ct/defspec
@@ -187,20 +187,21 @@
 
 (def tsne-prop
   (tc.prop/for-all
-    [g-matrix-payload (tc.gen/bind
-                        (tc.gen/choose 5 100)
-                        (fn [n]
-                          (tc.gen/tuple
-                            (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
-                                                               (tc.gen/choose 3 500))
-                                                 (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
-                                                                   :precision 5})
-                                                 true)
-                            (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
-                                                               (tc.gen/return 2))
-                                                 (t.u.gen/double* {:infinite? false :NaN? false :min -10.0 :max 10.0
-                                                                   :precision 5})
-                                                 true))))
+    [g-matrix-payload (t.u.gen/such-that-python-limit
+                        (tc.gen/bind
+                          (tc.gen/choose 5 100)
+                          (fn [n]
+                            (tc.gen/tuple
+                              (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
+                                                                 (tc.gen/choose 3 500))
+                                                   (t.u.gen/double* {:infinite? false :NaN? false :min -50.0 :max 50.0
+                                                                     :precision 5})
+                                                   true)
+                              (t.u.gen/gen-matrix* (tc.gen/tuple (tc.gen/return n)
+                                                                 (tc.gen/return 2))
+                                                   (t.u.gen/double* {:infinite? false :NaN? false :min -10.0 :max 10.0
+                                                                     :precision 5})
+                                                   true)))))
      g-perplexity (t.u.gen/double* {:infinite? false :NaN? false :min 10.0 :max 100.0
                                     :precision 3})]
     (diff-tsne (first g-matrix-payload) g-perplexity (last g-matrix-payload))))

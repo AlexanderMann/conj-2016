@@ -2,5 +2,9 @@ dependencies:
   cache_directories:
     - /home/ubuntu/.cache/pip
   pre:
-    - pip install --user numpy matplotlib:
+    - pip --version
+    - pip install wheel
+    - pip wheel --wheel-dir=/home/ubuntu/.cache/wheelhouse numpy
+    - pip wheel --wheel-dir=/home/ubuntu/.cache/wheelhouse matplotlib
+    - pip install --user --find-links=/home/ubuntu/.cache/wheelhouse numpy matplotlib:
         timeout: 1200

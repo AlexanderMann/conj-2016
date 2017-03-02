@@ -177,6 +177,15 @@
                        :python-bash python-bash})
          (throw e))))))
 
+(defn will-spit?
+  [args]
+  (-> (apply build-python-payload args)
+      json-dumps
+      count
+      ; subtract some arbitrary number to get close enough
+      (- 1000)
+      (>= spat-limit)))
+
 (defn python-result
   [repo module fname & args]
   (let [{:keys [deps o]} (apply build-python-payload args)

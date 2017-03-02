@@ -1,5 +1,6 @@
 (ns conj-2016.util.generator
   (:require [clojure.test.check.generators :as tc.gen]
+            [conj-2016.util.python :as u.py]
             [incanter.core :as i.core])
   (:import [java.math MathContext]))
 
@@ -60,3 +61,10 @@
   (tc.gen/fmap
     (partial to-precision precision)
     (tc.gen/double* opts)))
+
+(defn such-that-python-limit
+  [gen]
+  (tc.gen/such-that
+    (fn [& args]
+      (not (apply u.py/will-spit? args)))
+    gen))
