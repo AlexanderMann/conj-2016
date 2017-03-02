@@ -1,5 +1,7 @@
 dependencies:
   pre:
     - lein -v
+    - lein upgrade
+    - lein -v
     - lein deps :tree
     

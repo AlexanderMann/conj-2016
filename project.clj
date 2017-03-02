@@ -6,8 +6,7 @@
   :resource-paths ["resources"]
   :dependencies [[cheshire "5.7.0"]
                  [clatrix "0.5.0"]
-                 [com.taoensso/timbre "4.8.0"
-                  :exclusions [com.taoensso/encore]]
+                 [com.taoensso/timbre "4.8.0"]
                  [com.taoensso/tufte "1.1.1"]
                  [dali "0.7.3"]
                  [incanter "1.9.1"]
