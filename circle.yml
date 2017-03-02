@@ -1,0 +1,5 @@
+dependencies:
+  pre:
+    - lein -v
+    - lein deps :tree
+    
