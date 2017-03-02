@@ -1,10 +1,4 @@
 dependencies:
   post:
-    - pip install --user numpy
-    - pip install --user scipy
-    - pip install --user matplotlib
-    - pip install --user ipython
-    - pip install --user jupyter
-    - pip install --user pandas
-    - pip install --user sympy
-    - pip install --user nose
+    - pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose:
+        timeout: 1200
