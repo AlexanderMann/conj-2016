@@ -163,7 +163,10 @@
          to-return)
        (catch java.io.IOException e
          (log/error e)
-         (log/error "Leaving file alone to be able to review")
+         (log/error "Leaving file alone to be able to review"
+                    {:python-bash_length (count python-bash)
+                     :spat-limit spat-limit
+                     :diff (- (count python-bash) spat-limit)})
          (log/error python-bash)
          (throw e))
        (catch Exception e
