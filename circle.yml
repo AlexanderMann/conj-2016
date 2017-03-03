@@ -13,5 +13,5 @@ test:
   pre:
     - which python
     - python --version
-    - python -c "help('modules')" | grep -i tkinter
-    - python -c 'import Tkinter; import pylab; print 12345'
+    - python -c "help('modules')"
+    - python -c 'import Tkinter;'
