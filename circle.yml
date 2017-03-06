@@ -3,7 +3,6 @@ dependencies:
     - /home/ubuntu/.cache/pip
     - /home/ubuntu/.cache/wheelhouse
   pre:
-    - sudo apt-get upgrade python=2.7.11
     - sudo apt-get install tk-dev python-tk
     - pip install --upgrade pip
     - pip install wheel
