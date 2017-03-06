@@ -12,5 +12,5 @@ dependencies:
     - pip install wheel
     - pip wheel --find-links=/home/ubuntu/.cache/wheelhouse --wheel-dir=/home/ubuntu/.cache/wheelhouse numpy
     - pip wheel --find-links=/home/ubuntu/.cache/wheelhouse --wheel-dir=/home/ubuntu/.cache/wheelhouse matplotlib
-    - pip install --user --use-wheel --no-index --find-links=/home/ubuntu/.cache/wheelhouse numpy matplotlib:
+    - pip install --use-wheel --no-index --find-links=/home/ubuntu/.cache/wheelhouse numpy matplotlib:
         timeout: 1200
