@@ -3,7 +3,7 @@ dependencies:
     - /home/ubuntu/.cache/pip
     - /home/ubuntu/.cache/wheelhouse
   pre:
-    - cat 'export PATH=$(echo $PATH | sed -e "s/\/[^:]*\.pyenv\/[a-z]*\://g")' >> ~/.circlerc
+    - echo 'export PATH=$(echo $PATH | sed -e "s/\/[^:]*\.pyenv\/[a-z]*\://g")' >> ~/.circlerc
     - sudo apt-get install tk-dev python-tk
     - pip install --upgrade pip
     - pip install wheel
