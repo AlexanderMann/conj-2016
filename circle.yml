@@ -4,7 +4,6 @@ dependencies:
     - /home/ubuntu/.cache/wheelhouse
   pre:
     - sudo apt-get install tk-dev python-tk
-    - export PATH=$(echo $PATH | sed -e 's/\/[^:]*\.pyenv\/[a-z]*\://g')
     - pip install --upgrade pip
     - pip install wheel
     - pip wheel --find-links=/home/ubuntu/.cache/wheelhouse --wheel-dir=/home/ubuntu/.cache/wheelhouse numpy
@@ -14,6 +13,7 @@ dependencies:
 
 test:
   pre:
+    - export PATH=$(echo $PATH | sed -e 's/\/[^:]*\.pyenv\/[a-z]*\://g')
     - which python
     - python --version
     - python -c "help('modules')"
