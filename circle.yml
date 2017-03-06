@@ -1,16 +1,20 @@
-machine:
-  python:
-    version: 2.7.11
-
 dependencies:
   cache_directories:
     - /home/ubuntu/.cache/pip
     - /home/ubuntu/.cache/wheelhouse
   pre:
+    - sudo apt-get upgrade python=2.7.11
     - sudo apt-get install tk-dev python-tk
     - pip install --upgrade pip
     - pip install wheel
     - pip wheel --find-links=/home/ubuntu/.cache/wheelhouse --wheel-dir=/home/ubuntu/.cache/wheelhouse numpy
     - pip wheel --find-links=/home/ubuntu/.cache/wheelhouse --wheel-dir=/home/ubuntu/.cache/wheelhouse matplotlib
-    - pip install --use-wheel --no-index --find-links=/home/ubuntu/.cache/wheelhouse numpy matplotlib:
+    - pip install --user --use-wheel --no-index --find-links=/home/ubuntu/.cache/wheelhouse numpy matplotlib:
         timeout: 1200
+
+test:
+  pre:
+    - which python
+    - python --version
+    - python -c "help('modules')"
+    - python -c 'import Tkinter;'
