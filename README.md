@@ -1,5 +1,7 @@
 # conj-2016
 
+[See the talk here!](https://www.youtube.com/watch?v=qRXhjElFJJE)
+
 This repo was used to prepare the talk given by Alex Mann at Cognitect's 2016 Conj Conference. It includes a standard implementation of tSNE, examples of data rendered this way, a novel implementation of interop between Clojure and Python, a number of datasets which can be rendered into Clojure objects, and some examples of generatives testing.
 
 # Credit
